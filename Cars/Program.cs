@@ -19,8 +19,12 @@ namespace Cars
             var query2 =
                 from car in cars
                 orderby car.Combined ascending, car.Name ascending
-                select car;
-
+                select new //car; instead of using the car var, can create a simplified anonmymous var of car
+                {
+                    car.Manufacturer,
+                    car.Name,
+                    car.Combined
+                };
 
             var query3 =
                 from car in cars
@@ -37,8 +41,29 @@ namespace Cars
                                                                         // .FirstOrDefault prevents a query exception, but returns a null object
 
             var query5 = cars.Any(c => c.Manufacturer == "Ford");
-                         //.Any, .All, .Contains ask if the dataset matches the predicate
+            //.Any, .All, .Contains ask if the dataset matches the predicate
 
+            // Anonymous variable, can create a test class
+            var anon = new
+            {
+                Name = "Scott"
+            };
+
+            var query6 = cars.Select(c => c.Name);
+            //foreach (var name in query6)
+            //{
+            //    foreach (var character in name)
+            //    {
+            //        Console.WriteLine(character);
+            //    }
+            //}
+
+            // SelectMany combines collections together into one large collection (Lists, Arrays, etc.)
+            var query7 = cars.SelectMany(c => c.Name);
+            //foreach (var character in query7)
+            //{
+            //    Console.WriteLine(character);
+            //}
 
 
             foreach (var car in query2.Take(10))
