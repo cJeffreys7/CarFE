@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.Entity;
 
 namespace Cars
 {
@@ -12,8 +13,14 @@ namespace Cars
     {
         static void Main(string[] args)
         {
-            CreateXml();
-            QueryXml("BMW");
+            //CreateXml();
+            //QueryXml("BMW");
+
+            //Do NOT use this for production database
+            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<CarDb>());
+
+            InsertData();
+            QueryData();
 
             Console.Read();
 
@@ -112,6 +119,45 @@ namespace Cars
             //}
             //Console.ReadKey();
             #endregion QueryPractice
+        }
+
+        private static void InsertData()
+        {
+            var cars = ProcessFile("fuel.csv");
+            var db = new CarDb();
+
+            if (!db.Cars.Any())
+            {
+                foreach (var car in cars)
+                {
+                    db.Cars.Add(car);
+                }
+                db.SaveChanges();
+            }
+        }
+
+        private static void QueryData()
+        {
+            var db = new CarDb();
+            db.Database.Log = Console.WriteLine;
+
+            var query = from car in db.Cars
+                        orderby car.Combined descending, car.Name ascending
+                        select car;
+
+            //IQueryable is the expression, not compiled (ex: (x,y) => x + y vs. 1 + 1 = 2)
+            //Tranlates expression to SQL, does not happen in memory
+            //If wanting to bring query into memory, add .ToList() at the END to prevent additional queries
+            var query2 =
+                db.Cars
+                .OrderByDescending(c => c.Combined)
+                .ThenBy(c => c.Name)
+                .Take(10);
+
+            foreach (var car in query.Take(10))
+            {
+                Console.WriteLine($"{car.Name}: {car.Combined}");
+            }
         }
 
         private static void QueryXml(string manufacturer)
